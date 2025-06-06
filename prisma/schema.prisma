@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  studentId String     @unique
+  role      String
+  password  String
+  payments  Payment[]
+  results   Result[]
+   issues    BookIssue[]
+  createdAt DateTime   @default(now())
+}
+
+
+model Teacher {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  teacherId   String        @unique
+  name        String  
+  password    String
+  role        String
+  subjects    String[]      // Array of subjects the teacher teaches
+  results     Result[]
+  announcements Announcement[]  // Added relation to Announcement
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Payment {
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
+  transactionId String  @unique
+  status        String
+  amount      Float
+  currency      String
+  student   Student @relation(fields: [studentId], references: [studentId])
+  studentId String    @db.String
+  timestamp    String
+  phone      String
+}
+
+model Subject {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  subjectId String   @unique
+  subjectName String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+model Class {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  className String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Result {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  subject     String
+  marks       Int
+  grade       String
+  
+  points      Int      // Points for every subject
+  term        String      // Term (e.g., 1, 2, 3)
+  year        Int      // Year (e.g., 2025)
+  className   String   // Class name
+  studentName String   // Student name
+  student     Student  @relation(fields: [studentId], references: [studentId])
+  studentId   String   @db.String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id]) // Required relation
+  teacherId   String   @db.String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Indexes for better query performance
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([subject])
+  @@index([className])
+  @@index([year])
+}
+model Book {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  subject      String
+  bookId       String       @unique
+  available   Boolean @default(true)
+  issues      BookIssue[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model BookIssue {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  book       Book       @relation(fields: [bookId], references: [id])
+  bookId     String     @db.ObjectId
+  student    Student    @relation(fields: [studentId], references: [id])
+  studentId  String     @db.ObjectId
+  issueDate  DateTime   @default(now())
+  returnDate DateTime?
+  isReturned Boolean    @default(false)
+}
+
+
+
+
+model Announcement {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  teacherId String   @db.String
+  date      DateTime @default(now())
+}
+
+model Fees {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  studentId        String
+  checkoutRequestId String  @unique // Ensure correct casing here
+  amount           Int // Change Decimal to Int since MongoDB doesn't support Decimal
+  balance          Int
+  status           String // Payment status: "SUCCESS" or "FAILED"
+  date             DateTime @default(now()) // Automatically set the date
+}
+
+
+

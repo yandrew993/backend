@@ -11,7 +11,7 @@ export const registerUser = async (req, res) => {
     return res.status(400).json({ error: "All fields are required" });
   }
 
-  if (role !== "student" && role !== "teacher") {
+  if (role !== "student" && role !== "teacher" && role !== "librarian") {
     return res.status(400).json({ error: "Invalid role. Must be 'student' or 'teacher'" });
   }
 
@@ -76,13 +76,31 @@ export const loginUser = async (req, res) => {
     // Determine user role
     const role = user.studentId ? "student" : "teacher";
 
-    // Generate JWT token
-    const token = jwt.sign({ id: user.id, role }, process.env.JWT_SECRET_KEY, {
-      expiresIn: "1h",
-    });
+    // Define token expiration age (7 days)
+    const age = 1000 * 60 * 60 * 24 * 7;
 
-    // Send user data including role
-    res.status(200).json({ user: { ...user, role }, token });
+    // Generate a new JWT token
+    const token = jwt.sign(
+      { id: user.studentId || user.teacherId, role },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: age }
+    );
+
+    // Exclude password from user data
+    const { password: userPassword, ...userInfo } = user;
+
+    // Set token as an HTTP-only cookie and send user data
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        // secure: true, // Uncomment this in production for HTTPS
+        maxAge: age,
+      })
+      .status(200)
+      .json({
+        message: "Login successful",
+        user: { ...userInfo, role },
+      });
   } catch (error) {
     res.status(500).json({ error: "Failed to login" });
     console.error(error);

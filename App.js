@@ -13,12 +13,13 @@ import totalRoute from './routes/totalRouter.js';
 import subjectRoutes from './routes/subjectRoute.js';
 import bookRoutes from './routes/bookRoute.js';
 import classRoutes from './routes/classRoute.js';
+import cookieParser from "cookie-parser";
 const app = express();
 
 // Enhanced CORS Configuration
 const allowedOrigins = [
   'http://localhost:3001',
-  'http://localhost:3000',
+  'http://localhost:5173',
   'https://a54f-102-215-33-50.ngrok-free.app',
   // Add any other domains you need to allow
 ];
@@ -53,6 +54,7 @@ const corsOptions = {
 };
 
 // Middleware
+app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

@@ -11,6 +11,27 @@ export const getAllStudents = async (req, res) => {
     console.log(error)
   }
 };
+
+
+// get teacher by id
+export const getTeacherById = async (req, res) => {
+  const { teacherId } = req.params;
+
+  try {
+    const teacher = await prisma.teacher.findUnique({
+      where: { teacherId },
+    });
+
+    if (!teacher) {
+      return res.status(404).json({ error: 'Teacher not found' });
+    }
+
+    res.status(200).json(student);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch teacher' });
+  }
+};
+
 //Get total number of students
 export const getTotalStudents = async (req, res) => {
   try {
@@ -101,6 +122,7 @@ export default {
   getAllStudents,
   getTotalStudents,
   getTotalStudentsWithBooks,
+  getTeacherById,
   addStudent,
   updateStudent,
   deleteStudent,

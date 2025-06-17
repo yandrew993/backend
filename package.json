@@ -2,11 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "app.js",
+  "main": "App.js",
   "description": "Backend for school timetable system",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node App.js",
+    "dev": "nodemon App.js"
   },
   "author": "",
   "license": "ISC",

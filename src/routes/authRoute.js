@@ -10,6 +10,6 @@ import { verifyToken } from '../middleware/verifyToken.js';
 
 // Auth routes
 router.post('/register', registerUser);
-router.post('/login',verifyToken, loginUser);
+router.post('/login', loginUser);
 
 export default router;

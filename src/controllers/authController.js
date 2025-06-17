@@ -12,15 +12,12 @@ export const registerUser = async (req, res) => {
   }
 
   if (role !== "student" && role !== "teacher" && role !== "librarian") {
-    return res.status(400).json({ error: "Invalid role. Must be 'student' or 'teacher'" });
+    return res.status(400).json({ error: "Invalid role. Must be 'student', 'teacher', or 'librarian'" });
   }
 
   try {
     // Check if user already exists
-    const existingUser =
-      role === "student"
-        ? await prisma.student.findUnique({ where: { studentId: userId } })
-        : await prisma.teacher.findUnique({ where: { teacherId: userId } });
+    const existingUser = await prisma.user.findUnique({ where: { userId } });
 
     if (existingUser) {
       return res.status(400).json({ error: "User already exists" });
@@ -29,16 +26,10 @@ export const registerUser = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let newUser;
-    if (role === "student") {
-      newUser = await prisma.student.create({
-        data: { name, studentId: userId, password: hashedPassword, role },
-      });
-    } else {
-      newUser = await prisma.teacher.create({
-        data: { name, teacherId: userId, password: hashedPassword, role },
-      });
-    }
+    // Create a new user
+    const newUser = await prisma.user.create({
+      data: { name, userId, password: hashedPassword, role },
+    });
 
     res.status(201).json({ message: `${role} registered successfully` });
   } catch (error) {
@@ -56,12 +47,8 @@ export const loginUser = async (req, res) => {
   }
 
   try {
-    // Find user in both student and teacher tables
-    let user = await prisma.student.findUnique({ where: { studentId: userId } });
-
-    if (!user) {
-      user = await prisma.teacher.findUnique({ where: { teacherId: userId } });
-    }
+    // Find user in the User table
+    const user = await prisma.user.findUnique({ where: { userId } });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -73,15 +60,12 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ error: "Invalid password" });
     }
 
-    // Determine user role
-    const role = user.studentId ? "student" : "teacher";
-
     // Define token expiration age (7 days)
     const age = 1000 * 60 * 60 * 24 * 7;
 
     // Generate a new JWT token
     const token = jwt.sign(
-      { id: user.studentId || user.teacherId, role },
+      { id: user.id, role: user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: age }
     );
@@ -99,7 +83,7 @@ export const loginUser = async (req, res) => {
       .status(200)
       .json({
         message: "Login successful",
-        user: { ...userInfo, role },
+        user: userInfo,
       });
   } catch (error) {
     res.status(500).json({ error: "Failed to login" });

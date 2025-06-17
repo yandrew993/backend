@@ -5,8 +5,8 @@
   "main": "App.js",
   "description": "Backend for school timetable system",
   "scripts": {
-    "start": "node App.js",
-    "dev": "nodemon App.js"
+    "start": "node src/App.js",
+    "dev": "nodemon src/App.js"
   },
   "author": "",
   "license": "ISC",

@@ -57,14 +57,14 @@ model Payment {
 
 model Subject {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  subjectId String   @unique
-  subjectName String
+  subjectId   String  //@unique @db.String // Ensure subjectId is unique and non-null
+  subjectName String   @db.String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 model Class {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  className String   @unique
+  className String   //@unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -91,7 +91,7 @@ model Result {
   @@index([studentId])
   @@index([teacherId])
   @@index([subject])
-  @@index([className])
+  //@@index([className])
   @@index([year])
 }
 model Book {

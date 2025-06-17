@@ -21,8 +21,6 @@ model Student {
   id        String     @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   studentId String     @unique
-  role      String
-  password  String
   payments  Payment[]
   results   Result[]
    issues    BookIssue[]

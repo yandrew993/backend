@@ -56,9 +56,9 @@ export const getTotalStudentsWithBooks = async (req, res) => {
 
 // Add a new student
 export const addStudent = async (req, res) => {
-  const { name, studentId, age, grade } = req.body;
+  const { name, studentId } = req.body;
 
-  if (!name || !studentId || !age || !grade) {
+  if (!name || !studentId) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
@@ -66,9 +66,7 @@ export const addStudent = async (req, res) => {
     const newStudent = await prisma.student.create({
       data: {
         name,
-        studentId,
-        age,
-        grade,
+        studentId
       },
     });
     res.status(201).json(newStudent);

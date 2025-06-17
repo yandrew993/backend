@@ -20,6 +20,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3001',
   'http://localhost:5173',
+  'https://library-system-phi.vercel.app/',
   'https://a54f-102-215-33-50.ngrok-free.app',
   // Add any other domains you need to allow
 ];

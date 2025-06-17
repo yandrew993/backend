@@ -1,36 +1,35 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import cookieParser from "cookie-parser";
+
 import authRoutes from './routes/authRoute.js';
 import resultRoutes from './routes/resultRoute.js';
 import announcementRoutes from './routes/announcementRoute.js';
 import studentRoutes from "./routes/studentRoute.js";
 import paymentRoute from './routes/paymentRoute.js';
-import callbackRoutes from './routes/callbackRoute.js'
+import callbackRoutes from './routes/callbackRoute.js';
 import waitingRoute from './routes/waitingRoute.js';
 import feeRoute from './routes/feeRoute.js';
 import totalRoute from './routes/totalRouter.js';
 import subjectRoutes from './routes/subjectRoute.js';
 import bookRoutes from './routes/bookRoute.js';
 import classRoutes from './routes/classRoute.js';
-import cookieParser from "cookie-parser";
+
 const app = express();
 
-// Enhanced CORS Configuration
+// ✅ Allowed Origins (no trailing slash)
 const allowedOrigins = [
   'http://localhost:3001',
   'http://localhost:5173',
-  'https://library-system-phi.vercel.app/',
-  'https://a54f-102-215-33-50.ngrok-free.app',
-  // Add any other domains you need to allow
+  'https://library-system-phi.vercel.app',
+  'https://a54f-102-215-33-50.ngrok-free.app'
 ];
 
+// ✅ CORS Configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -49,82 +48,74 @@ const corsOptions = {
   ],
   exposedHeaders: ['Content-Length', 'Authorization'],
   credentials: true,
-  maxAge: 86400, // 24 hours
+  maxAge: 86400,
   preflightContinue: false,
   optionsSuccessStatus: 204
 };
 
-// Middleware
+// ✅ Middleware
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Special handling for preflight requests
+// ✅ Handle preflight requests
 app.options('*', cors(corsOptions));
 
-// Add headers before the routes are defined
-app.use(function (req, res, next) {
-  // Website you wish to allow to connect
+// ✅ Custom headers (double-checking for strict environments)
+app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
 
-  // Request methods you wish to allow
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-  // Request headers you wish to allow
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,Authorization');
-
-  // Set to true if you need the website to include cookies in the requests
-  res.setHeader('Access-Control-Allow-Credentials', true);
-
-  // Pass to next layer of middleware
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 });
 
-// Routes
+// ✅ Routes
 app.use('/api/auth', authRoutes);
 app.use('/api', resultRoutes);
 app.use('/api', announcementRoutes);
 app.use('/api', studentRoutes);
 app.use('/api', subjectRoutes);
-app.use('/api', bookRoutes); 
+app.use('/api', bookRoutes);
 app.use('/api', classRoutes);
 app.use('/api/payment', paymentRoute);
-app.use('/api/callback', callbackRoutes);// Ensure callback has its own route
-app.use('/api/complete', waitingRoute)
-app.use('/api', feeRoute)
-app.use('/api', totalRoute)
+app.use('/api/callback', callbackRoutes);
+app.use('/api/complete', waitingRoute);
+app.use('/api', feeRoute);
+app.use('/api', totalRoute);
 
-// M-Pesa Callback URL Verification Endpoint
+// ✅ M-Pesa callback URL verification
 app.get('/api/callback/verify', (req, res) => {
   res.status(200).send('Callback URL verified');
 });
 
-// Default route
+// ✅ Default route
 app.get('/', (req, res) => {
   res.send('Welcome to the School Management API');
 });
 
-// Health check endpoint
+// ✅ Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' });
 });
 
-// Error handling middleware
+// ✅ Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-// Catch-all for undefined routes
+// ✅ 404 Catch-all
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Start the server
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running on port ${PORT}`);

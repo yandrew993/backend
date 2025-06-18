@@ -3,23 +3,38 @@ const prisma = new PrismaClient();
 
 
 
-// Add a new student
 export const addStudent = async (req, res) => {
   const { name, studentId } = req.body;
 
+  // Validate input
   if (!name || !studentId) {
+    console.warn("Validation Error: Missing required fields", { name, studentId });
     return res.status(400).json({ error: 'All fields are required' });
   }
 
   try {
+    // Attempt to create the student
     const newStudent = await prisma.student.create({
       data: {
         name,
-        studentId
+        studentId,
       },
     });
     res.status(201).json(newStudent);
+
   } catch (error) {
+    // Log the error stack trace for debugging
+    console.error("Database Error while adding student:", {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+    });
+
+    // Handle known Prisma error codes
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'Student ID already exists' });
+    }
+
     res.status(500).json({ error: 'Failed to add student' });
   }
 };

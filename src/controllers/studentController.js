@@ -4,10 +4,10 @@ const prisma = new PrismaClient();
 
 
 export const addStudent = async (req, res) => {
-  const { name, studentId,role } = req.body;
+  const { name, studentId } = req.body;
 
   // Validate input
-  if (!name || !studentId || !role) {
+  if (!name || !studentId ) {
     console.warn("Validation Error: Missing required fields", { name, studentId });
     return res.status(400).json({ error: 'All fields are required' });
   }
@@ -18,7 +18,7 @@ export const addStudent = async (req, res) => {
       data: {
         name,
         studentId,
-        role: "student", 
+        //role: "student", 
       },
     });
     res.status(201).json(newStudent);

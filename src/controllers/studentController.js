@@ -1,6 +1,29 @@
 import {PrismaClient} from '@prisma/client';
 const prisma = new PrismaClient();
 
+
+
+// Add a new student
+export const addStudent = async (req, res) => {
+  const { name, studentId } = req.body;
+
+  if (!name || !studentId) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    const newStudent = await prisma.student.create({
+      data: {
+        name,
+        studentId
+      },
+    });
+    res.status(201).json(newStudent);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add student' });
+  }
+};
+
 // Get all students
 export const getAllStudents = async (req, res) => {
   try {
@@ -54,26 +77,7 @@ export const getTotalStudentsWithBooks = async (req, res) => {
   }
 };
 
-// Add a new student
-export const addStudent = async (req, res) => {
-  const { name, studentId } = req.body;
 
-  if (!name || !studentId) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
-
-  try {
-    const newStudent = await prisma.student.create({
-      data: {
-        name,
-        studentId
-      },
-    });
-    res.status(201).json(newStudent);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to add student' });
-  }
-};
 
 // Update a student
 export const updateStudent = async (req, res) => {

@@ -4,34 +4,36 @@ const prisma = new PrismaClient();
 
 
 export const addStudent = async (req, res) => {
-  const { name, studentId } = req.body;
+  const { name, studentId, password } = req.body;
 
   // Validate input
-  if (!name || !studentId ) {
-    console.warn("Validation Error: Missing required fields", { name, studentId });
-    return res.status(400).json({ error: 'All fields are required' });
+  if (!name || !studentId || !password) {
+    console.warn("Validation Error: Missing required fields", { name, studentId, passwordPresent: !!password });
+    return res.status(400).json({ error: 'All fields (name, studentId, password) are required' });
   }
 
   try {
-    // Attempt to create the student
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newStudent = await prisma.student.create({
       data: {
         name,
         studentId,
-        //role: "student", 
+        password: hashedPassword,
+        role: "student", // Automatically assigned
       },
     });
-    res.status(201).json(newStudent);
+
+    res.status(201).json({ message: "Student created successfully", student: newStudent });
 
   } catch (error) {
-    // Log the error stack trace for debugging
     console.error("Database Error while adding student:", {
       message: error.message,
       code: error.code,
       stack: error.stack,
     });
 
-    // Handle known Prisma error codes
     if (error.code === 'P2002') {
       return res.status(409).json({ error: 'Student ID already exists' });
     }
